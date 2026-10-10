@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: odoo
+  namespace: odoo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: odoo
+  template:
+    metadata:
+      labels:
+        app: odoo
+    spec:
+      imagePullSecrets:
+      - name: gitlab-registry
+      containers:
+      - name: odoo
+        image: registry.gitlab.com/nitheesh3216/odoo20-demo:afe879e6935a088aebdecbb13f3f6ad24fda40ae
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8069
+          protocol: TCP
+        env:
+        - name: HOST
+          value: postgres
+        - name: PORT
+          value: '5432'
+        - name: USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_USER
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: POSTGRES_PASSWORD
+        args:
+        - --http-interface=0.0.0.0
